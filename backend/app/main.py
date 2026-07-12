@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.api.root import router as root_router
+from app.api.prompt import router as prompt_router
 from app.core.config import settings
 from app.core.logging import logger
 
@@ -25,3 +26,4 @@ app = FastAPI(
 )
 
 app.include_router(root_router)
+app.include_router(prompt_router)
