@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Query, status
 
 from app.schemas.prompt import PromptRequest
 from app.schemas.prompt_response import PromptResponse
@@ -30,4 +30,15 @@ def get_prompt(prompt_id: int):
 
     return {
         "prompt_id": prompt_id
+    }
+
+
+@router.get("/")
+def list_prompts(
+    limit: int = Query(default=10, ge=1, le=100),
+    search: str | None = None,
+):
+    return {
+        "limit": limit,
+        "search": search,
     }
