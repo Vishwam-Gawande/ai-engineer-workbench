@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, HTTPException, Path, Query, status
 
 from app.schemas.prompt import PromptRequest
 from app.schemas.prompt_response import PromptResponse
@@ -21,7 +21,11 @@ def submit_prompt(request: PromptRequest):
 
 
 @router.get("/{prompt_id}")
-def get_prompt(prompt_id: int):
+def get_prompt(
+    prompt_id: int = Path(
+        ge=1,
+    ),
+):
     if prompt_id > 100:
         raise HTTPException(
             status_code=404,
