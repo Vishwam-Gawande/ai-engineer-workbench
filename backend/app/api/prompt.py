@@ -24,6 +24,9 @@ def submit_prompt(request: PromptRequest):
 def get_prompt(
     prompt_id: int = Path(
         ge=1,
+        title="Prompt ID",
+        description="Unique ID of the prompt.",
+        examples=[1],
     ),
 ):
     if prompt_id > 100:
@@ -39,10 +42,40 @@ def get_prompt(
 
 @router.get("/")
 def list_prompts(
-    limit: int = Query(default=10, ge=1, le=100),
-    search: str | None = None,
+    limit: int = Query(
+        default=10,
+        ge=1,
+        le=100,
+        title="Limit",
+        description="Maximum number of prompts to return.",
+        examples=[20],
+    ),
+    search: str | None = Query(
+        default=None,
+        alias="q",
+        title="Search",
+        description="Optional keyword used to filter prompts.",
+        examples=["rag"],
+        min_length=2,
+        max_length=50,
+        pattern=r"^[A-Za-z0-9 _-]+$",
+    ),
+    category: str | None = Query(
+        default=None,
+        title="Category",
+        description="Optional prompt category filter.",
+        examples=["rag"],
+    ),
 ):
+    # Reject whitespace-only searches
+    if search is not None and search.strip() == "":
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Search query cannot contain only whitespace.",
+        )
+
     return {
         "limit": limit,
         "search": search,
+        "category": category,
     }
