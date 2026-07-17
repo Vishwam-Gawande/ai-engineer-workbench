@@ -1,7 +1,17 @@
-from fastapi import APIRouter, HTTPException, Path, Query, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    Path,
+    Query,
+    status,
+)
 
+
+from app.core.security import verify_api_key
 from app.schemas.prompt import PromptRequest
 from app.schemas.prompt_response import PromptResponse
+
 
 router = APIRouter(
     prefix="/prompts",
@@ -42,6 +52,7 @@ def get_prompt(
 
 @router.get("/")
 def list_prompts(
+    _: str = Depends(verify_api_key),
     limit: int = Query(
         default=10,
         ge=1,
