@@ -1,7 +1,7 @@
 from fastapi import HTTPException, Security, status
 from fastapi.security import APIKeyHeader
 
-API_KEY = "workbench-secret-key"
+from app.core.settings import API_KEY
 
 api_key_header = APIKeyHeader(
     name="X-API-Key",
