@@ -19,15 +19,12 @@ router = APIRouter(
 )
 
 
-@router.post(
-    "/",
-    response_model=PromptResponse,
-    status_code=status.HTTP_201_CREATED,
-)
-def submit_prompt(request: PromptRequest):
-    return PromptResponse(
-        received_prompt=request.prompt
-    )
+@router.post("/", status_code=201)
+def submit_prompt(prompt: PromptRequest):
+    return {
+        "title": prompt.title,
+        "tags": prompt.tags,
+    }
 
 
 @router.get("/{prompt_id}")
