@@ -19,12 +19,28 @@ router = APIRouter(
 )
 
 
-@router.post("/", status_code=201)
+@router.post(
+    "/",
+    response_model=PromptResponse,
+    status_code=status.HTTP_201_CREATED,
+    responses={
+        400: {
+            "description": "Invalid prompt data."
+        },
+        401: {
+            "description": "Unauthorized."
+        },
+        500: {
+            "description": "Internal server error."
+        },
+    },
+)
 def submit_prompt(prompt: PromptRequest):
-    return {
-        "title": prompt.title,
-        "tags": prompt.tags,
-    }
+    return PromptResponse(
+    prompt_id=1,
+    title=prompt.title,
+    tags=prompt.tags,
+)
 
 
 @router.get("/{prompt_id}")
