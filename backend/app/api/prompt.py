@@ -13,6 +13,12 @@ from app.schemas.prompt import PromptRequest
 from app.schemas.prompt_response import PromptResponse
 
 
+from sqlalchemy.orm import Session
+
+from app.db.dependencies import get_db
+from app.models.prompt import Prompt
+
+
 router = APIRouter(
     prefix="/prompts",
     tags=["Prompts"],
@@ -35,32 +41,55 @@ router = APIRouter(
         },
     },
 )
-def submit_prompt(prompt: PromptRequest):
-    return PromptResponse(
-    prompt_id=1,
+def submit_prompt(
+    prompt: PromptRequest,
+    db: Session = Depends(get_db),
+):
+    db_prompt = Prompt(
     title=prompt.title,
-    tags=prompt.tags,
+    tags=", ".join(prompt.tags),
+)
+
+    db.add(db_prompt)
+    db.commit()
+    db.refresh(db_prompt)
+
+    return PromptResponse(
+        id=db_prompt.id,
+        title=db_prompt.title,
+        tags=db_prompt.tags.split(", "),
+        status="success",
+        version="v1",
 )
 
 
-@router.get("/{prompt_id}")
+@router.get(
+    "/{prompt_id}",
+    response_model=PromptResponse,
+)
 def get_prompt(
     prompt_id: int = Path(
         ge=1,
         title="Prompt ID",
         description="Unique ID of the prompt.",
-        examples=[1],
     ),
+    db: Session = Depends(get_db),
 ):
-    if prompt_id > 100:
+    prompt = db.get(Prompt, prompt_id)
+
+    if prompt is None:
         raise HTTPException(
             status_code=404,
             detail="Prompt not found",
         )
 
-    return {
-        "prompt_id": prompt_id
-    }
+    return PromptResponse(
+        id=prompt.id,
+        title=prompt.title,
+        tags=prompt.tags.split(", "),
+        status="success",
+        version="v1",
+    )
 
 
 @router.get("/")

@@ -6,6 +6,7 @@ from app.api.root import router as root_router
 from app.api.prompt import router as prompt_router
 from app.core.config import settings
 from app.core.logging import logger
+from app.db.init_db import init_db
 
 logger.info("Starting AI Engineer Workbench...")
 
@@ -13,6 +14,8 @@ logger.info("Starting AI Engineer Workbench...")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Application startup complete.")
+
+    init_db()
 
     yield
 

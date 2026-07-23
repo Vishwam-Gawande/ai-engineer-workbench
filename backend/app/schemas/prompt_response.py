@@ -1,13 +1,9 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class PromptResponse(BaseModel):
-    prompt_id: int = Field(serialization_alias="id")
-
+    id: int
     title: str
-
     tags: list[str]
-
     status: str = "success"
-
     version: str = "v1"
