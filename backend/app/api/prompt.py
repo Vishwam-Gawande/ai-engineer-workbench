@@ -19,6 +19,9 @@ from app.db.dependencies import get_db
 from app.models.prompt import Prompt
 
 
+from app.schemas.prompt_update import PromptUpdateRequest
+
+
 router = APIRouter(
     prefix="/prompts",
     tags=["Prompts"],
@@ -90,6 +93,58 @@ def get_prompt(
         status="success",
         version="v1",
     )
+
+
+@router.put(
+    "/{prompt_id}",
+    response_model=PromptResponse,
+)
+def update_prompt(
+    prompt_id: int,
+    prompt_update: PromptUpdateRequest,
+    db: Session = Depends(get_db),
+):
+    prompt = db.get(Prompt, prompt_id)
+
+    if prompt is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Prompt not found",
+        )
+
+    prompt.title = prompt_update.title
+    prompt.tags = ", ".join(prompt_update.tags)
+
+    db.commit()
+    db.refresh(prompt)
+
+    return PromptResponse(
+        id=prompt.id,
+        title=prompt.title,
+        tags=prompt.tags.split(", "),
+        status="success",
+        version="v1",
+    )
+
+
+@router.delete(
+    "/{prompt_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def delete_prompt(
+    prompt_id: int,
+    db: Session = Depends(get_db),
+):
+    prompt = db.get(Prompt, prompt_id)
+
+    if prompt is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Prompt not found",
+        )
+
+    db.delete(prompt)
+    db.commit()
 
 
 @router.get("/")
