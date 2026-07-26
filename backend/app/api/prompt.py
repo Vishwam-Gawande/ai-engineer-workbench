@@ -7,19 +7,16 @@ from fastapi import (
     status,
 )
 
-
-from app.core.security import verify_api_key
-from app.schemas.prompt import PromptRequest
-from app.schemas.prompt_response import PromptResponse
-
-
 from sqlalchemy.orm import Session
 
+from app.core.security import verify_api_key
 from app.db.dependencies import get_db
-from app.models.prompt import Prompt
 
+from app.repositories.prompt_repository import PromptRepository
 
+from app.schemas.prompt import PromptRequest
 from app.schemas.prompt_update import PromptUpdateRequest
+from app.schemas.prompt_response import PromptResponse
 
 
 router = APIRouter(
@@ -33,29 +30,17 @@ router = APIRouter(
     response_model=PromptResponse,
     status_code=status.HTTP_201_CREATED,
     responses={
-        400: {
-            "description": "Invalid prompt data."
-        },
-        401: {
-            "description": "Unauthorized."
-        },
-        500: {
-            "description": "Internal server error."
-        },
+        400: {"description": "Invalid prompt data."},
+        401: {"description": "Unauthorized."},
+        500: {"description": "Internal server error."},
     },
 )
 def submit_prompt(
     prompt: PromptRequest,
     db: Session = Depends(get_db),
 ):
-    db_prompt = Prompt(
-    title=prompt.title,
-    tags=", ".join(prompt.tags),
-)
-
-    db.add(db_prompt)
-    db.commit()
-    db.refresh(db_prompt)
+    repo = PromptRepository(db)
+    db_prompt = repo.create(prompt)
 
     return PromptResponse(
         id=db_prompt.id,
@@ -63,7 +48,7 @@ def submit_prompt(
         tags=db_prompt.tags.split(", "),
         status="success",
         version="v1",
-)
+    )
 
 
 @router.get(
@@ -78,7 +63,9 @@ def get_prompt(
     ),
     db: Session = Depends(get_db),
 ):
-    prompt = db.get(Prompt, prompt_id)
+    repo = PromptRepository(db)
+
+    prompt = repo.get_by_id(prompt_id)
 
     if prompt is None:
         raise HTTPException(
@@ -104,24 +91,25 @@ def update_prompt(
     prompt_update: PromptUpdateRequest,
     db: Session = Depends(get_db),
 ):
-    prompt = db.get(Prompt, prompt_id)
+    repo = PromptRepository(db)
 
-    if prompt is None:
+    db_prompt = repo.get_by_id(prompt_id)
+
+    if db_prompt is None:
         raise HTTPException(
             status_code=404,
             detail="Prompt not found",
         )
 
-    prompt.title = prompt_update.title
-    prompt.tags = ", ".join(prompt_update.tags)
-
-    db.commit()
-    db.refresh(prompt)
+    updated_prompt = repo.update(
+    db_prompt,
+    prompt_update,
+    )
 
     return PromptResponse(
-        id=prompt.id,
-        title=prompt.title,
-        tags=prompt.tags.split(", "),
+        id=updated_prompt.id,
+        title=updated_prompt.title,
+        tags=updated_prompt.tags.split(", "),
         status="success",
         version="v1",
     )
@@ -135,21 +123,23 @@ def delete_prompt(
     prompt_id: int,
     db: Session = Depends(get_db),
 ):
-    prompt = db.get(Prompt, prompt_id)
+    repo = PromptRepository(db)
 
-    if prompt is None:
+    db_prompt = repo.get_by_id(prompt_id)
+
+    if db_prompt is None:
         raise HTTPException(
             status_code=404,
             detail="Prompt not found",
         )
 
-    db.delete(prompt)
-    db.commit()
+    repo.delete(db_prompt)
 
 
 @router.get("/")
 def list_prompts(
     _: str = Depends(verify_api_key),
+    db: Session = Depends(get_db),
     limit: int = Query(
         default=10,
         ge=1,
@@ -175,15 +165,14 @@ def list_prompts(
         examples=["rag"],
     ),
 ):
-    # Reject whitespace-only searches
     if search is not None and search.strip() == "":
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="Search query cannot contain only whitespace.",
         )
 
-    return {
-        "limit": limit,
-        "search": search,
-        "category": category,
-    }
+    repo = PromptRepository(db)
+
+    prompts = repo.get_all()
+
+    return prompts
