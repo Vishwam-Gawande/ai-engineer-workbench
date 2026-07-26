@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 from app.core.security import verify_api_key
 from app.db.dependencies import get_db
 
-from app.repositories.prompt_repository import PromptRepository
+from app.services.prompt_service import PromptService
 
 from app.schemas.prompt import PromptRequest
 from app.schemas.prompt_update import PromptUpdateRequest
@@ -39,15 +39,17 @@ def submit_prompt(
     prompt: PromptRequest,
     db: Session = Depends(get_db),
 ):
-    repo = PromptRepository(db)
-    db_prompt = repo.create(prompt)
+    service = PromptService(db)
+
+    db_prompt = service.create_prompt(prompt)
 
     return PromptResponse(
-        id=db_prompt.id,
-        title=db_prompt.title,
-        tags=db_prompt.tags.split(", "),
-        status="success",
-        version="v1",
+    id=db_prompt.id,
+    title=db_prompt.title,
+    tags=[tag.strip() for tag in db_prompt.tags.split(",")] if db_prompt.tags else [],
+    category=db_prompt.category,
+    status="success",
+    version="v1",
     )
 
 
@@ -63,22 +65,23 @@ def get_prompt(
     ),
     db: Session = Depends(get_db),
 ):
-    repo = PromptRepository(db)
+    service = PromptService(db)
 
-    prompt = repo.get_by_id(prompt_id)
+    prompt = service.get_prompt(prompt_id)
 
     if prompt is None:
         raise HTTPException(
-            status_code=404,
-            detail="Prompt not found",
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Prompt not found.",
         )
 
     return PromptResponse(
-        id=prompt.id,
-        title=prompt.title,
-        tags=prompt.tags.split(", "),
-        status="success",
-        version="v1",
+    id=prompt.id,
+    title=prompt.title,
+    tags=[tag.strip() for tag in prompt.tags.split(",")] if prompt.tags else [],
+    category=prompt.category,
+    status="success",
+    version="v1",
     )
 
 
@@ -91,27 +94,26 @@ def update_prompt(
     prompt_update: PromptUpdateRequest,
     db: Session = Depends(get_db),
 ):
-    repo = PromptRepository(db)
+    service = PromptService(db)
 
-    db_prompt = repo.get_by_id(prompt_id)
-
-    if db_prompt is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Prompt not found",
-        )
-
-    updated_prompt = repo.update(
-    db_prompt,
-    prompt_update,
+    updated_prompt = service.update_prompt(
+        prompt_id,
+        prompt_update,
     )
 
+    if updated_prompt is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Prompt not found.",
+        )
+
     return PromptResponse(
-        id=updated_prompt.id,
-        title=updated_prompt.title,
-        tags=updated_prompt.tags.split(", "),
-        status="success",
-        version="v1",
+    id=updated_prompt.id,
+    title=updated_prompt.title,
+    tags=[tag.strip() for tag in updated_prompt.tags.split(",")] if updated_prompt.tags else [],
+    category=updated_prompt.category,
+    status="success",
+    version="v1",
     )
 
 
@@ -123,20 +125,21 @@ def delete_prompt(
     prompt_id: int,
     db: Session = Depends(get_db),
 ):
-    repo = PromptRepository(db)
+    service = PromptService(db)
 
-    db_prompt = repo.get_by_id(prompt_id)
+    deleted = service.delete_prompt(prompt_id)
 
-    if db_prompt is None:
+    if not deleted:
         raise HTTPException(
-            status_code=404,
-            detail="Prompt not found",
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Prompt not found.",
         )
 
-    repo.delete(db_prompt)
 
-
-@router.get("/")
+@router.get(
+    "/",
+    response_model=list[PromptResponse],
+)
 def list_prompts(
     _: str = Depends(verify_api_key),
     db: Session = Depends(get_db),
@@ -144,25 +147,13 @@ def list_prompts(
         default=10,
         ge=1,
         le=100,
-        title="Limit",
-        description="Maximum number of prompts to return.",
-        examples=[20],
     ),
     search: str | None = Query(
         default=None,
         alias="q",
-        title="Search",
-        description="Optional keyword used to filter prompts.",
-        examples=["rag"],
-        min_length=2,
-        max_length=50,
-        pattern=r"^[A-Za-z0-9 _-]+$",
     ),
     category: str | None = Query(
         default=None,
-        title="Category",
-        description="Optional prompt category filter.",
-        examples=["rag"],
     ),
 ):
     if search is not None and search.strip() == "":
@@ -171,8 +162,22 @@ def list_prompts(
             detail="Search query cannot contain only whitespace.",
         )
 
-    repo = PromptRepository(db)
+    service = PromptService(db)
 
-    prompts = repo.get_all()
+    prompts = service.list_prompts(
+        limit=limit,
+        search=search,
+        category=category,
+    )
 
-    return prompts
+    return [
+        PromptResponse(
+            id=p.id,
+            title=p.title,
+            tags=[tag.strip() for tag in p.tags.split(",")] if p.tags else [],
+            category=p.category,
+            status="success",
+            version="v1",
+        )
+        for p in prompts
+    ]

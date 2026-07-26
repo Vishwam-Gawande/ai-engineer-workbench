@@ -22,3 +22,9 @@ class Prompt(Base):
         String(255),
         nullable=False,
     )
+
+    category: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False,
+        default="general",
+    )

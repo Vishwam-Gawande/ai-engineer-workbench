@@ -10,3 +10,8 @@ class PromptUpdateRequest(BaseModel):
     tags: list[str] = Field(
         min_length=1,
     )
+
+    category: str = Field(
+        min_length=3,
+        max_length=100,
+    )

@@ -11,9 +11,10 @@ class PromptRepository:
 
     def create(self, prompt: PromptRequest) -> Prompt:
         db_prompt = Prompt(
-            title=prompt.title,
-            tags=", ".join(prompt.tags),
-        )
+        title=prompt.title,
+        tags=",".join(prompt.tags),
+        category=prompt.category,
+    )
 
         self.db.add(db_prompt)
         self.db.commit()
@@ -21,8 +22,26 @@ class PromptRepository:
 
         return db_prompt
 
-    def get_all(self) -> list[Prompt]:
-        return self.db.query(Prompt).all()
+    def get_all(
+        self,
+        limit: int,
+        search: str | None,
+        category: str | None,
+    ) -> list[Prompt]:
+
+        query = self.db.query(Prompt)
+
+        if search:
+            query = query.filter(
+                Prompt.title.ilike(f"%{search}%")
+            )
+
+        if category:
+            query = query.filter(
+                Prompt.category.ilike(f"%{category}%")
+            )
+
+        return query.limit(limit).all()
 
     def get_by_id(self, prompt_id: int) -> Prompt | None:
         return (
@@ -38,7 +57,8 @@ class PromptRepository:
     ) -> Prompt:
 
         db_prompt.title = prompt.title
-        db_prompt.tags = ", ".join(prompt.tags)
+        db_prompt.tags = ",".join(prompt.tags)
+        db_prompt.category = prompt.category
 
         self.db.commit()
         self.db.refresh(db_prompt)
