@@ -1,12 +1,7 @@
-import "./index.css";
+import AppRoutes from "./routes";
 
 function App() {
-  return (
-    <div className="app">
-      <h1>AI Engineer Workbench</h1>
-      <p>Frontend successfully connected.</p>
-    </div>
-  );
+  return <AppRoutes />;
 }
 
 export default App;
