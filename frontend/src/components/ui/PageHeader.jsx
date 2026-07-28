@@ -1,14 +1,18 @@
-export default function PageHeader({ title, description }) {
+export default function PageHeader({
+  title,
+  description,
+}) {
   return (
-    <header
+    <div
       style={{
-        marginBottom: "32px",
+        marginBottom: "40px",
       }}
     >
       <h1
         style={{
-          margin: 0,
-          fontSize: "2rem",
+          marginBottom: "8px",
+          fontSize: "34px",
+          color: "#111827",
         }}
       >
         {title}
@@ -16,12 +20,13 @@ export default function PageHeader({ title, description }) {
 
       <p
         style={{
-          marginTop: "8px",
+          margin: 0,
           color: "#6b7280",
+          fontSize: "16px",
         }}
       >
         {description}
       </p>
-    </header>
+    </div>
   );
 }

@@ -1,14 +1,19 @@
 export default function QuickActionCard({ title }) {
   return (
-    <div
+    <button
       style={{
-        background: "white",
-        borderRadius: "12px",
-        padding: "20px",
+        width: "100%",
+        padding: "18px",
+        background: "#2563eb",
+        color: "white",
+        border: "none",
+        borderRadius: "10px",
         cursor: "pointer",
+        fontWeight: "600",
+        fontSize: "15px",
       }}
     >
-      <h3>{title}</h3>
-    </div>
+      {title}
+    </button>
   );
 }
