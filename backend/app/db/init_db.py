@@ -3,6 +3,7 @@ from app.db.database import engine
 
 # Import all models here so SQLAlchemy knows about them
 from app.models.prompt import Prompt
+from app.models.trace import Trace
 
 
 def init_db():
