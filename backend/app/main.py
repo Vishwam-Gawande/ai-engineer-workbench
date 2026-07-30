@@ -42,6 +42,4 @@ app.add_middleware(
 
 app.include_router(root_router)
 app.include_router(prompt_router)
-app.include_router(root_router)
-app.include_router(prompt_router)
 app.include_router(trace_router)

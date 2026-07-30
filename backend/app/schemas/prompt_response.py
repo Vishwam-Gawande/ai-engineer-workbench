@@ -1,10 +1,11 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class PromptResponse(BaseModel):
     id: int
-    title: str
-    tags: list[str]
-    category: str
-    status: str
-    version: str
+    user_id: int
+    name: str
+    version: int
+    template: str
+
+    model_config = ConfigDict(from_attributes=True)

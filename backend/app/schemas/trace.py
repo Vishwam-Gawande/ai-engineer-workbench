@@ -1,32 +1,29 @@
-from pydantic import BaseModel
-
-
-class TraceResponse(BaseModel):
-    id: int
-    trace_name: str
-    model: str
-    latency: str
-    tokens: str
-    cost: str
-    status: str
-
-    class Config:
-        from_attributes = True
+from pydantic import BaseModel, ConfigDict
 
 
 class TraceCreate(BaseModel):
+    user_id: int
     trace_name: str
-    model: str
-    latency: str
-    tokens: str
-    cost: str
     status: str
+    model_name: str
+    latency_ms: int
+    total_tokens: int
+    total_cost: float
 
 
 class TraceUpdate(BaseModel):
     trace_name: str | None = None
-    model: str | None = None
-    latency: str | None = None
-    tokens: str | None = None
-    cost: str | None = None
     status: str | None = None
+
+
+class TraceResponse(BaseModel):
+    id: int
+    user_id: int
+    trace_name: str
+    status: str
+    model_name: str
+    latency_ms: int
+    total_tokens: int
+    total_cost: float
+
+    model_config = ConfigDict(from_attributes=True)

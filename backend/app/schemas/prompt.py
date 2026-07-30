@@ -1,7 +1,8 @@
 from pydantic import BaseModel
 
 
-class PromptRequest(BaseModel):
-    title: str
-    tags: list[str]
-    category: str = "general"
+class PromptCreate(BaseModel):
+    user_id: int
+    name: str
+    version: int
+    template: str

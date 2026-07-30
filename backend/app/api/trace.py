@@ -3,15 +3,15 @@ from sqlalchemy.orm import Session
 
 from app.db.dependencies import get_db
 
-from app.models.trace import Trace
+from app.models.models import Trace
 
-from app.repositories.trace_repository import TraceRepository
 from app.schemas.trace import (
     TraceCreate,
     TraceResponse,
-    TraceUpdate,
 )
+
 from app.services.trace_service import TraceService
+
 
 router = APIRouter(
     prefix="/traces",
@@ -19,9 +19,10 @@ router = APIRouter(
 )
 
 
-def get_trace_service(db: Session = Depends(get_db)):
-    repository = TraceRepository(db)
-    return TraceService(repository)
+def get_trace_service(
+    db: Session = Depends(get_db),
+):
+    return TraceService(db)
 
 
 @router.get(
@@ -31,7 +32,7 @@ def get_trace_service(db: Session = Depends(get_db)):
 def list_traces(
     service: TraceService = Depends(get_trace_service),
 ):
-    return service.get_traces()
+    return service.list_traces()
 
 
 @router.get(
@@ -58,52 +59,9 @@ def get_trace(
     response_model=TraceResponse,
 )
 def create_trace(
-    trace_data: TraceCreate,
+    data: TraceCreate,
     service: TraceService = Depends(get_trace_service),
 ):
-    return service.create_trace(trace_data)
+    trace = Trace(**data.model_dump())
 
-
-@router.put(
-    "/{trace_id}",
-    response_model=TraceResponse,
-)
-def update_trace(
-    trace_id: int,
-    trace_data: TraceUpdate,
-    service: TraceService = Depends(get_trace_service),
-):
-    trace = service.get_trace(trace_id)
-
-    if not trace:
-        raise HTTPException(
-            status_code=404,
-            detail="Trace not found.",
-        )
-
-    return service.update_trace(
-        trace,
-        trace_data,
-    )
-
-
-@router.delete(
-    "/{trace_id}",
-)
-def delete_trace(
-    trace_id: int,
-    service: TraceService = Depends(get_trace_service),
-):
-    trace = service.get_trace(trace_id)
-
-    if not trace:
-        raise HTTPException(
-            status_code=404,
-            detail="Trace not found.",
-        )
-
-    service.delete_trace(trace)
-
-    return {
-        "message": "Trace deleted successfully."
-    }
+    return service.create_trace(trace)
