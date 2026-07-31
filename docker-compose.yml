@@ -1,0 +1,40 @@
+# docker-compose.yml
+services:
+  postgres:
+    image: postgres:16
+    container_name: ai-workbench-db
+    environment:
+      POSTGRES_DB: ai_workbench
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    container_name: ai-workbench-backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    environment:
+      # Passes the internal connection string to your backend app
+      # Format: postgresql://USER:PASSWORD@SERVICE_NAME:PORT/DB_NAME
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/ai_workbench
+
+  frontend:
+    build: ./frontend
+
+    container_name: ai-workbench-frontend
+
+    ports:
+      - "5173:5173"
+
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
