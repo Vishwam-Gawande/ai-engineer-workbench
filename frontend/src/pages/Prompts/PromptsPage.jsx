@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import MainLayout from "../../layouts/MainLayout";
+
 
 import PageHeader from "../../components/ui/PageHeader";
 
@@ -23,7 +23,7 @@ export default function PromptsPage() {
   }, []);
 
   return (
-    <MainLayout>
+    <>
       <PageHeader
         title="Prompts"
         description="Manage prompt templates and versions."
@@ -37,10 +37,9 @@ export default function PromptsPage() {
             key={prompt.id}
             name={prompt.name}
             version={prompt.version}
-            model={prompt.model}
           />
         ))}
       </PromptList>
-    </MainLayout>
+    </>
   );
 }

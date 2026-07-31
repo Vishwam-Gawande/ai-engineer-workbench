@@ -37,7 +37,7 @@ export default function PromptCard({
           color: "#6b7280",
         }}
       >
-        Model: {model}
+        {/* Model: {model} */}
       </p>
     </div>
   );
