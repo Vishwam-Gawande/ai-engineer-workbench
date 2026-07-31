@@ -1,4 +1,4 @@
-import MainLayout from "../../layouts/MainLayout";
+
 
 import PageHeader from "../../components/ui/PageHeader";
 
@@ -25,26 +25,27 @@ export default function TracesPage() {
   }, []);
 
   return (
-    <MainLayout>
-      <PageHeader
-        title="Traces"
-        description="Inspect AI execution traces and debug application behavior."
-      />
+  <>
+    <PageHeader
+      title="Traces"
+      description="Inspect AI execution traces and debug application behavior."
+    />
 
-      <TraceList>
-        {traces.map((trace) => (
-          <TraceCard
-            key={trace.id}
-            traceName={trace.trace_name}
-            model={trace.model}
-            latency={trace.latency}
-            tokens={trace.tokens}
-            cost={trace.cost}
-            status={trace.status}
-          />
-        ))}
-      </TraceList>
-      <TraceTimeline />
-    </MainLayout>
-  );
+    <TraceList>
+      {traces.map((trace) => (
+        <TraceCard
+          key={trace.id}
+          traceName={trace.trace_name}
+          model={trace.model_name}
+          latency={trace.latency_ms}
+          tokens={trace.total_tokens}
+          cost={trace.total_cost}
+          status={trace.status}
+        />
+      ))}
+    </TraceList>
+
+    <TraceTimeline />
+  </>
+);
 }

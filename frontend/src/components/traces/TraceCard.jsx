@@ -1,4 +1,4 @@
-import StatusBadge from "./StatusBadge";
+import Card from "../ui/Card";
 
 export default function TraceCard({
   traceName,
@@ -8,42 +8,105 @@ export default function TraceCard({
   cost,
   status,
 }) {
+  const statusColor =
+    status === "SUCCESS"
+      ? "#16a34a"
+      : "#dc2626";
+
   return (
-    <div
-      style={{
-        background: "white",
-        borderRadius: "12px",
-        padding: "20px",
-        border: "1px solid #e5e7eb",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-      }}
-    >
+    <Card>
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: "12px",
         }}
       >
-        <h3
+        <div>
+          <h3
+            style={{
+              margin: 0,
+              fontSize: "18px",
+            }}
+          >
+            {traceName}
+          </h3>
+
+          <p
+            style={{
+              margin: "8px 0",
+              color: "#6b7280",
+            }}
+          >
+            {model}
+          </p>
+        </div>
+
+        <span
           style={{
-            margin: 0,
+            background: statusColor,
+            color: "white",
+            padding: "6px 12px",
+            borderRadius: "20px",
+            fontSize: "13px",
+            fontWeight: 600,
           }}
         >
-          {traceName}
-        </h3>
-
-        <StatusBadge status={status} />
+          {status}
+        </span>
       </div>
 
-      <p>Model: {model}</p>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3,1fr)",
+          marginTop: "20px",
+          gap: "20px",
+        }}
+      >
+        <Metric
+          title="Latency"
+          value={`${latency} ms`}
+        />
 
-      <p>Latency: {latency}</p>
+        <Metric
+          title="Tokens"
+          value={tokens}
+        />
 
-      <p>Tokens: {tokens}</p>
+        <Metric
+          title="Cost"
+          value={`$${cost}`}
+        />
+      </div>
+    </Card>
+  );
+}
 
-      <p>Cost: {cost}</p>
+function Metric({
+  title,
+  value,
+}) {
+  return (
+    <div>
+      <div
+        style={{
+          color: "#6b7280",
+          fontSize: "13px",
+        }}
+      >
+        {title}
+      </div>
+
+      <div
+        style={{
+          marginTop: "6px",
+          fontWeight: 700,
+          fontSize: "18px",
+        }}
+      >
+        {value}
+      </div>
     </div>
   );
 }

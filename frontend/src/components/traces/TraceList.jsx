@@ -1,9 +1,13 @@
-export default function TraceList({ children }) {
+export default function TraceList({
+  children,
+}) {
   return (
     <div
       style={{
-        display: "grid",
+        display: "flex",
+        flexDirection: "column",
         gap: "20px",
+        marginBottom: "40px",
       }}
     >
       {children}
