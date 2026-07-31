@@ -1,19 +1,14 @@
-export default function QuickActionCard({ title }) {
+import Button from "../ui/Button";
+import Card from "../ui/Card";
+
+export default function QuickActionCard({
+  title,
+}) {
   return (
-    <button
-      style={{
-        width: "100%",
-        padding: "18px",
-        background: "#2563eb",
-        color: "white",
-        border: "none",
-        borderRadius: "10px",
-        cursor: "pointer",
-        fontWeight: "600",
-        fontSize: "15px",
-      }}
-    >
-      {title}
-    </button>
+    <Card>
+      <Button>
+        {title}
+      </Button>
+    </Card>
   );
 }

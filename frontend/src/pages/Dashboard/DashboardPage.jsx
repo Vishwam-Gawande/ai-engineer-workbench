@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+
 import PageHeader from "../../components/ui/PageHeader";
 
 import StatsCard from "../../components/dashboard/StatsCard";
@@ -5,13 +7,50 @@ import ActivityCard from "../../components/dashboard/ActivityCard";
 import QuickActionCard from "../../components/dashboard/QuickActionCard";
 import SectionTitle from "../../components/dashboard/SectionTitle";
 
-import {
-  stats,
-  recentActivities,
-  quickActions,
-} from "../../services/dashboardData";
+import { getDashboardStats } from "../../services/dashboardService";
+
+const recentActivities = [
+  "Trace completed successfully.",
+  "Prompt updated.",
+  "Evaluation finished.",
+];
+
+const quickActions = [
+  "New Prompt",
+  "View Traces",
+  "Run Evaluation",
+];
 
 export default function DashboardPage() {
+  const [stats, setStats] = useState([]);
+
+  useEffect(() => {
+    async function loadDashboard() {
+      const data = await getDashboardStats();
+
+      setStats([
+        {
+          title: "Traces",
+          value: data.traceCount,
+        },
+        {
+          title: "Cost",
+          value: `$${data.totalCost.toFixed(3)}`,
+        },
+        {
+          title: "Latency",
+          value: `${data.averageLatency} ms`,
+        },
+        {
+          title: "Success Rate",
+          value: `${data.successRate}%`,
+        },
+      ]);
+    }
+
+    loadDashboard();
+  }, []);
+
   return (
     <>
       <PageHeader
@@ -19,7 +58,6 @@ export default function DashboardPage() {
         description="Monitor your AI applications, traces, evaluations, and experiments."
       />
 
-      {/* Overview */}
       <SectionTitle title="Overview" />
 
       <div
@@ -30,16 +68,15 @@ export default function DashboardPage() {
           marginBottom: "40px",
         }}
       >
-      {stats.map((stat) => (
-        <StatsCard
-          key={stat.title}
-          title={stat.title}
-          value={stat.value}
-        />
-      ))}
+        {stats.map((stat) => (
+          <StatsCard
+            key={stat.title}
+            title={stat.title}
+            value={stat.value}
+          />
+        ))}
       </div>
 
-      {/* Recent Activity + Quick Actions */}
       <div
         style={{
           display: "grid",
@@ -47,7 +84,6 @@ export default function DashboardPage() {
           gap: "24px",
         }}
       >
-        {/* Left Column */}
         <div>
           <SectionTitle title="Recent Activity" />
 
@@ -59,7 +95,6 @@ export default function DashboardPage() {
           ))}
         </div>
 
-        {/* Right Column */}
         <div>
           <SectionTitle title="Quick Actions" />
 

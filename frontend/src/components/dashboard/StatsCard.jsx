@@ -1,34 +1,48 @@
-export default function StatsCard({ title, value }) {
-  return (
-    <div
-      style={{
-        background: "#ffffff",
-        borderRadius: "12px",
-        padding: "24px",
-        boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
-        border: "1px solid #e5e7eb",
-      }}
-    >
-      <p
-        style={{
-          margin: 0,
-          fontSize: "14px",
-          color: "#6b7280",
-        }}
-      >
-        {title}
-      </p>
+import Card from "../ui/Card";
+import { colors } from "../../styles/theme";
 
-      <h2
+export default function StatsCard({
+  title,
+  value,
+}) {
+  return (
+    <Card>
+      <div
         style={{
-          marginTop: "12px",
-          marginBottom: 0,
-          fontSize: "30px",
-          color: "#111827",
+          display: "flex",
+          flexDirection: "column",
+          gap: "12px",
         }}
       >
-        {value}
-      </h2>
-    </div>
+        <span
+          style={{
+            color: colors.textSecondary,
+            fontSize: "14px",
+          }}
+        >
+          {title}
+        </span>
+
+        <h2
+          style={{
+            margin: 0,
+            fontSize: "34px",
+            fontWeight: 700,
+          }}
+        >
+          {value}
+        </h2>
+
+        <span
+          style={{
+            color: "#16a34a",
+            fontSize: "13px",
+            fontWeight: 600,
+          }}
+        >
+          ↑ Healthy
+        </span>
+      </div>
+    </Card>
   );
 }
