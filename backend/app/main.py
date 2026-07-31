@@ -9,6 +9,7 @@ from app.api.trace import router as trace_router
 from app.core.config import settings
 from app.core.logging import logger
 from app.db.init_db import init_db
+from app.db.seed import seed_database
 
 logger.info("Starting AI Engineer Workbench...")
 
@@ -18,6 +19,8 @@ async def lifespan(app: FastAPI):
     logger.info("Application startup complete.")
 
     init_db()
+
+    seed_database()
 
     yield
 
