@@ -15,6 +15,10 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    env:
+    API_KEY: ${{ secrets.API_KEY }}
+    DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
     defaults:
       run:
         working-directory: backend
