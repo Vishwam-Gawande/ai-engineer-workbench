@@ -15,20 +15,33 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ai_workbench
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     env:
-      API_KEY: ${{ secrets.API_KEY }}
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      API_KEY: workbench-secret-key
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/ai_workbench
 
     defaults:
       run:
         working-directory: backend
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.14"
 
@@ -36,6 +49,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+
+      - name: Create Database Tables
+        run: python create_tables.py
 
       - name: Run Backend Tests
         env:
