@@ -3,6 +3,8 @@ from sqlalchemy.orm import Session
 
 from app.db.dependencies import get_db
 
+from app.core.security import verify_api_key
+
 from app.models.models import Prompt
 
 from app.schemas.prompt import PromptCreate
@@ -15,6 +17,7 @@ from app.services.prompt_service import PromptService
 router = APIRouter(
     prefix="/prompts",
     tags=["Prompts"],
+    dependencies=[Depends(verify_api_key)],
 )
 
 
