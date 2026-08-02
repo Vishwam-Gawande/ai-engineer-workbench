@@ -37,6 +37,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
+        "https://ai-engineer-workbench.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
